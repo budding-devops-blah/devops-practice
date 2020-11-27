@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: filebeat
-  namespace: kube-system
+  namespace: kube-elk
   labels:
     k8s-app: filebeat
 
@@ -31,7 +31,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: filebeat
-  namespace: kube-system
+  namespace: kube-elk
 roleRef:
   kind: ClusterRole
   name: filebeat
@@ -42,7 +42,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: filebeat-config
-  namespace: kube-system
+  namespace: kube-elk
   labels:
     k8s-app: filebeat
     kubernetes.io/cluster-service: "true"
@@ -71,7 +71,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: filebeat-prospectors
-  namespace: kube-system
+  namespace: kube-elk
   labels:
     k8s-app: filebeat
     kubernetes.io/cluster-service: "true"
@@ -88,7 +88,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: filebeat
-  namespace: kube-system
+  namespace: kube-elk
   labels:
     k8s-app: filebeat
     kubernetes.io/cluster-service: "true"
