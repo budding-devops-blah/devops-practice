@@ -4,7 +4,7 @@ metadata:
   name: grafana
   namespace: monitoring
 spec:
-  replicas: 1
+  replicas: 6
   selector:
     matchLabels:
       app: grafana
@@ -33,6 +33,11 @@ spec:
           - mountPath: /etc/grafana/provisioning/datasources
             name: grafana-datasources
             readOnly: false
+        resources:
+          limits:
+            memory: "200Mi"
+          requests:
+            memory: "100Mi"   
       volumes:
         - name: grafana-storage
           emptyDir: {}
