@@ -72,3 +72,5 @@ spec:
   selector:
     app: grafana
     purpose: example
+
+###https://www.metricfire.com/blog/deploying-grafana-to-kubernetes/
