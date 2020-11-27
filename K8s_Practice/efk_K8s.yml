@@ -21,6 +21,18 @@ spec:
     - port: 9300
       name: inter-node
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: kube-elk
+  name: elasticsearch-data-config
+  labels:
+    app: elasticsearch
+data:
+  elasticsearch.yml: |-
+    xpack.security.enabled: true
+    xpack.monitoring.collection.enabled: true
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -55,6 +67,10 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /usr/share/elasticsearch/data
+        - name: config
+          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+          readOnly: true
+          subPath: elasticsearch.yml  
         env:
           - name: cluster.name
             value: k8s-logs
@@ -237,3 +253,4 @@ spec:
           path: /var/lib/docker/containers 
 ###https://www.digitalocean.com/community/tutorials/how-to-set-up-an-elasticsearch-fluentd-and-kibana-efk-logging-stack-on-kubernetes
 ###https://portworx.com/run-ha-elasticsearch-elk-azure-kubernetes-service/
+###https://www.studytonight.com/post/setup-elasticsearch-with-authentication-xpack-security-enabled-on-kubernetes#
