@@ -8,7 +8,7 @@ spec:
      storage: 3Gi
      accessModes:
            - ReadWriteOnce
-    persistentVolumeReclaimPolicy: Retain
+   persistentVolumeReclaimPolicy: Retain
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -41,7 +41,7 @@ spec:
         purpose: example        
      spec:
       containers:
-       - image: grafana/grafana:latest
+        image: grafana/grafana:latest
          name: grafana-image
          ports:
           - containerPort: 3000
@@ -50,7 +50,7 @@ spec:
            - name: grafana-volume
              mountpath: /var/lib/grafana
       volumes:
-        - name: grafana-volume
+        name: grafana-volume
           persistentVolumeClaim:
             claimName: grafana-volume-claim
 ---
@@ -64,7 +64,7 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - name: grafana-ui
+    name: grafana-ui
     port: 3000
     nodePort: 30080
     protocol: TCP
@@ -72,5 +72,4 @@ spec:
   selector:
     app: grafana
     purpose: example
-
 ###https://www.metricfire.com/blog/deploying-grafana-to-kubernetes/
