@@ -50,7 +50,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: example-secrets
-  namespace: example
+  namespace: kube-elk
 type: Opaque
 stringData:
   ELASTIC_USERNAME: "elastic"
@@ -127,13 +127,13 @@ spec:
         - name: elasticsearch-logging
           mountPath: /data
         - name: elasticsearch-config
-          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+          mountPath: /etc/elasticsearch/elasticsearch.yml
           readOnly: true
           subPath: elasticsearch.yml
       volumes:
       - name: elasticsearch-logging
         emptyDir: {}
-       - name: elasticsearch-config
+      - name: elasticsearch-config
         configMap:
           name: elasticsearch-config 
       # Elasticsearch requires vm.max_map_count to be at least 262144.
