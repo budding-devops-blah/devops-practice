@@ -48,7 +48,7 @@ roleRef:
 ---
 kind: ConfigMap
 metadata:
-  namespace: logging
+  namespace: kube-elk
   name: elasticsearch-config
   labels:
     app: elasticsearch
