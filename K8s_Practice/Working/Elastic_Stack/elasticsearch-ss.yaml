@@ -46,6 +46,45 @@ roleRef:
   name: elasticsearch-logging
   apiGroup: ""
 ---
+kind: ConfigMap
+metadata:
+  namespace: logging
+  name: elasticsearch-config
+  labels:
+    app: elasticsearch
+    role: master
+data:
+  elasticsearch.yml: |-
+    cluster.name: ${CLUSTER_NAME}
+    node.name: ${NODE_NAME}
+    discovery.seed_hosts: ${NODE_LIST}
+    cluster.initial_master_nodes: ${MASTER_NODES}
+    network.host: 0.0.0.0
+    node:
+      master: true
+      data: false
+      ingest: false
+    xpack.security.enabled: true
+    xpack.monitoring.collection.enabled: true  
+environment:
+  - cluster.name=elasticsearch-logging
+  - ELASTIC_USERNAME=elastic
+  - ELASTIC_PASSWORD=DkIedPPSCb
+  - xpack.security.enabled=true
+  - xpack.security.transport.ssl.enabled=true
+  #- xpack.monitoring.enabled=true
+  #- xpack.monitoring.collection.enabled=true
+  #- xpack.license.self_generated.type=trial
+  - node.name=elasticsearch4
+  - http.cors.enabled=true
+  - http.cors.allow-origin=*
+  - bootstrap.memory_lock=true
+  - node.max_local_storage_nodes=4
+  - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  - discovery.seed_hosts=elasticsearch,elasticsearch2,elasticsearch3,elasticsearch4
+  - cluster.initial_master_nodes=elasticsearch,elasticsearch2,elasticsearch3,elasticsearch4  
+  
+---
 # Elasticsearch deployment itself
 apiVersion: apps/v1
 kind: StatefulSet
@@ -93,14 +132,23 @@ spec:
         volumeMounts:
         - name: elasticsearch-logging
           mountPath: /data
+        - name: elasticsearch-config
+          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+          readOnly: true
+          subPath: elasticsearch.yml  
+        # Define the environment variable for Secutrity        
         env:
-        - name: "NAMESPACE"
+        - name: elasticsearch-config
           valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
+            configMapKeyRef:
+              name: elasticsearch-config
+              key: environment
       volumes:
       - name: elasticsearch-logging
         emptyDir: {}
+       - name: elasticsearch-config
+        configMap:
+          name: elasticsearch-config 
       # Elasticsearch requires vm.max_map_count to be at least 262144.
       # If your OS already sets up this number to a higher value, feel free
       # to remove this init container.
