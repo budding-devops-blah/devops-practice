@@ -46,6 +46,16 @@ roleRef:
   name: elasticsearch-logging
   apiGroup: ""
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: example-secrets
+  namespace: example
+type: Opaque
+stringData:
+  ELASTIC_USERNAME: "elastic"
+  ELASTIC_PASSWORD: "DkIedPPSCb"  
+---
 kind: ConfigMap
 metadata:
   namespace: kube-elk
@@ -55,10 +65,10 @@ metadata:
     role: master
 data:
   elasticsearch.yml: |-
-    cluster.name: ${CLUSTER_NAME}
-    node.name: ${NODE_NAME}
-    discovery.seed_hosts: ${NODE_LIST}
-    cluster.initial_master_nodes: ${MASTER_NODES}
+    cluster.name=elasticsearch-logging
+    node.name=elasticsearch4
+    discovery.seed_hosts=elasticsearch,elasticsearch2,elasticsearch3,elasticsearch4
+    cluster.initial_master_nodes=elasticsearch,elasticsearch2,elasticsearch3,elasticsearch4  
     network.host: 0.0.0.0
     node:
       master: true
@@ -66,24 +76,8 @@ data:
       ingest: false
     xpack.security.enabled: true
     xpack.monitoring.collection.enabled: true  
-environment:
-  - cluster.name=elasticsearch-logging
-  - ELASTIC_USERNAME=elastic
-  - ELASTIC_PASSWORD=DkIedPPSCb
-  - xpack.security.enabled=true
-  - xpack.security.transport.ssl.enabled=true
-  #- xpack.monitoring.enabled=true
-  #- xpack.monitoring.collection.enabled=true
-  #- xpack.license.self_generated.type=trial
-  - node.name=elasticsearch4
-  - http.cors.enabled=true
-  - http.cors.allow-origin=*
-  - bootstrap.memory_lock=true
-  - node.max_local_storage_nodes=4
-  - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-  - discovery.seed_hosts=elasticsearch,elasticsearch2,elasticsearch3,elasticsearch4
-  - cluster.initial_master_nodes=elasticsearch,elasticsearch2,elasticsearch3,elasticsearch4  
-  
+    ELASTIC_USERNAME=elastic
+    ELASTIC_PASSWORD=DkIedPPSCb
 ---
 # Elasticsearch deployment itself
 apiVersion: apps/v1
@@ -135,14 +129,7 @@ spec:
         - name: elasticsearch-config
           mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
           readOnly: true
-          subPath: elasticsearch.yml  
-        # Define the environment variable for Secutrity        
-        env:
-        - name: elasticsearch-config
-          valueFrom:
-            configMapKeyRef:
-              name: elasticsearch-config
-              key: environment
+          subPath: elasticsearch.yml
       volumes:
       - name: elasticsearch-logging
         emptyDir: {}
