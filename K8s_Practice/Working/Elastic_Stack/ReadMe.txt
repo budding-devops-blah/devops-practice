@@ -121,3 +121,5 @@ spec:
     driver: efs.csi.aws.com
     volumeHandle: fs-44205695 # Your EFS file system ID
 -----------------------------
+-----------------------------Follow Below Steps to mount EFS on an EC2 instance---------------
+https://docs.aws.amazon.com/efs/latest/ug/wt1-test.html
