@@ -57,6 +57,7 @@ stringData:
   ELASTIC_PASSWORD: "DkIedPPSCb"  
 ---
 kind: ConfigMap
+apiVersion: v1
 metadata:
   namespace: kube-elk
   name: elasticsearch-config
@@ -89,30 +90,31 @@ provisioner: efs.csi.aws.com
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: efs-pv
+  name: elk-efs-pv
 spec:
   capacity:
     storage: 1Gi
   volumeMode: Filesystem
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: efs-sc
+  storageClassName: elk-efs-sc
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: fs-19d5a2c8
+    volumeHandle: fs-bdc7b06c
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: elk-efs-claim
+  namespace: kube-elk
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   storageClassName: elk-efs-sc
   resources:
     requests:
-      storage: 1Gi    
+      storage: 1Gi 
 ---
 # Elasticsearch deployment itself
 apiVersion: apps/v1
@@ -175,7 +177,7 @@ spec:
           name: elasticsearch-config
       - name: elk-persistent-storage
         persistentVolumeClaim:
-        claimName: elk-efs-claim    
+          claimName: elk-efs-claim    
       # Elasticsearch requires vm.max_map_count to be at least 262144.
       # If your OS already sets up this number to a higher value, feel free
       # to remove this init container.
