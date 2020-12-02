@@ -116,7 +116,7 @@ $	velero backup describe staging-backup
 
 $	kubectl delete namespace <namespace-name>
 
------------Restore Backup from Velero to a New Cluster--------
+-----------Restore Backup from Velero to Same cluster--------
 
 $	velero restore create --from-backup <backup-name>
 
@@ -129,3 +129,31 @@ $	velero restore get
 $	kubectl get all -n <namespace-name>
 
 ----------------------------------This is how to create and restore a backup--------------------
+
+
+----------------------------------Create and Restore to new cluster-----------------------
+
+Make Sure Velero is installed and other pre-req like Iam Roles are setup
+
+---------------------------Configure Velero for your Cluster-------------------
+$	velero install \
+    --provider aws \
+    --plugins velero/velero-plugin-for-aws:v1.0.1 \
+    --bucket <S3-Bucket-URL> \
+    --backup-location-config region=<Region-Name> \
+    --snapshot-location-config region=<Region-Name> \
+    --secret-file ./velero-credentials
+-------------------------Check if your backup is listing by entering below command-------
+$	velero get backup
+------------------------Once your backup is listing restore it with below commands----------
+$	velero restore create --from-backup <backup-name>
+
+----------Check Backup Status------------
+
+$	velero restore get
+
+-----------Check backed-up application------
+
+$	kubectl get all -n <namespace-name>
+
+----------------------------------This is how to restore a backup to a new cluster--------------------
