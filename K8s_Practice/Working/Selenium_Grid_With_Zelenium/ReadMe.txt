@@ -20,3 +20,28 @@ $	http://<NodeIP>:<NodePort>/grid/admin/live
 $	http://<NodeIP>:<NodePort>/grid/console
 
 Insteract with your Zalenium console using VNC with "Interact via VNC"
+
+
+----------To execute your selenium remotly add below lines in your code----------
+ import org.openqa.selenium.*;
+ import org.openqa.selenium.remote.DesiredCapabilities;
+ import java.net.MalformedURLException;
+ import java.net.URL;
+ import org.openqa.selenium.remote.RemoteWebDriver;
+ import org.testng.Assert;
+ import org.testng.annotations.*;
+ ##################################
+     WebDriver driver;
+     String baseURL, nodeURL;
+	 
+     public void setUp() throws MalformedURLException {
+         baseURL = "http://google.com";
+         nodeURL = "<ZaleniumgridURL:4444/wd/hub>";
+         DesiredCapabilities capability = DesiredCapabilities.chrome();
+         capability.setBrowserName("chrome");
+         capability.setPlatform(Platform.WIN10);
+         driver = new RemoteWebDriver(new URL(nodeURL), capability);
+     }
+	 
+	 <Your test cases>
+--------------------------------------------------------------------------------	 
