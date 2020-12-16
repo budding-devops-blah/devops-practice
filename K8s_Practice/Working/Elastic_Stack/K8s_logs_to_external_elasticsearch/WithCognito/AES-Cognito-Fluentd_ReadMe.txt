@@ -46,6 +46,37 @@
 
 6. Under Access Policy select "Custom Access Policy" and choose IAM as element with IAM Role created for Cognito's arn being entered at Principal.
 
-7. Once the Elastic Search is ready, we will not be able to access it outside our VPC, hence access the Kibana endpoint "Kibanahttps://vpc-elk-kibana-afzwwcw5fnidvncijnelitzbzu.ap-south-1.es.amazonaws.com/_plugin/kibana/" from a   instance which is present in your same VPC.
+7. Once the Elastic Search is ready, we will not be able to access it outside our VPC, hence access the Kibana endpoint "https://vpc-elk-kibana-afzwwcw5fnidvncijnelitzbzu.ap-south-1.es.amazonaws.com/_plugin/kibana/" from a   instance which is present in your same VPC.
 
 8. At first login, password change will be asked post which we will be able to login into Kibana with Cognito Userpool
+
+-----------------------Setup FluentD for external ElasticSearch--------------
+#####Fluentd can't directly communicate with Elasticsearch eventhough it's in same VPC, so we use es-proxy for communication. Hence we are deploing the same.
+#####Spin up EKS in same VPC as that of Elasticsearch or we will be needing VPCPeer to send data from FluentD to Elasticsearch.
+----Create namespace----
+$	kubectl create namespace kube-elk
+
+----initialize helm----
+
+$ helm init
+
+----Edit your secret, access and endpoint in :es-proxy-deploy.yaml" deployment file----
+
+$     - image: gcr.io/learning-containers-187204/vke-es-proxy #built using a go based es-proxy
+        name: es-proxy
+        env:        
+        - name: AWS_ACCESS_KEY_ID
+          value: "<AWS_Access_Key>"
+        - name: AWS_SECRET_ACCESS_KEY
+          value: "<AWS_Secret_key>"
+        - name: ES_ENDPOINT
+          value: "https://vpc-elk-kibana-afzwwcw5fnidvncijnelitzbzu.ap-south-1.es.amazonaws.com/_plugin/kibana/"
+        volumeMounts:
+		
+$	kubectl create -f es-proxy-deploy.yaml
+$	kubectl create -f es-proxy-service.yaml
+
+$	helm install --name kube-elk-cogito -f values-es.yaml stable/fluentd-elasticsearch --namespace=kube-elk
+
+
+Open elasticsearch and in discover tab we can see Fluentd sending all log data.
