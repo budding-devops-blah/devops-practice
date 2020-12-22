@@ -19,7 +19,7 @@
 
 8.Once done click on the review section and click on create pool.
 
-9.Click on domain name section on the left .Type a name in the text box. In this example, I used "elk-kibana". Be sure to choose Save changes.
+9. Click on domain name section on the left .Type a name in the text box. In this example, I used "elk-kibana". Be sure to choose Save changes.
 
 10. Make a note of Pool ID, we need those details again when we shall be creating the user identity pool.
 
