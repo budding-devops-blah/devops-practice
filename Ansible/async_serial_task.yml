@@ -1,0 +1,25 @@
+---
+- name: Splunk_Carbon
+  hosts: all
+  become: yes
+  serial:
+    - 5
+    - 5
+    - 3
+  vars:
+     run_group: sam
+     run_user: sam
+  tasks:
+      - name: Copy Script
+        copy:
+           src: "/home/sam/scripts/AlertConfig/tempscript/Splunk_Carbon.sh"
+           dest: "/home/sam/scripts/AlertConfig/tempscript/"
+           owner: "{{ run_user }}"
+           group: "{{ run_group }}"
+           mode: 0755
+           backup: yes
+
+      - name: Run the script with async
+        command: /home/sam/scripts/AlertConfig/tempscript/Splunk_Carbon.sh
+        poll: 0
+        async: 360
