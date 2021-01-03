@@ -60,3 +60,4 @@
          name: {{ db_name }}
          state: restore
          target: /home/sam/PSQL.dump.tar.gz
+         delegate_to: '{{ groups.db_slaves[0] }}'
