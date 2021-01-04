@@ -5,7 +5,7 @@
     vars:
      db_name: employee_db
      db_user: db_user
-     db_password: Passw0rd
+     #db_password: Passw0rd
 
   tasks:
 
@@ -47,7 +47,7 @@
       - name: Ensure user has access to the database
         postgresql_user: db={{ db_name }}
                      name={{ db_user }}
-                     password={{ db_password }}
+                     password=login_password: "{{ lookup('aws_secret', 'psql_db_user_password') }}"
                      priv=ALL
                      state=present
       
