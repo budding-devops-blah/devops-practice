@@ -1,6 +1,22 @@
 ---
+- name: Restore PSQL on different Server
+  hosts: db_servers_master
+  become: yes
+    vars:
+     db_name: employee_db
+     db_user: db_user
+     db_password: Passw0rd
+
+  tasks:
+
+      - name: Backup PostgreSQL
+        postgresql_db:
+                name: {{ db_name }}
+                state: dump
+                target: /home/sam/PSQL.dump.tar.gz 
+---
 - name: Install PSQL
-  hosts: db_servers
+  hosts: db_servers_slaves
   become: yes
   vars:
      db_name: employee_db
@@ -40,24 +56,9 @@
                      role_attr_flags=NOSUPERUSER,NOCREATEDB
                      state=pr
                      
-      - name: Backup PostgreSQL
+      - name: import database and restore
         postgresql_db:
-                name: {{ db_name }}
-                state: dump
-                target: /home/sam/PSQL.dump.tar.gz
-
----
-- name: Restore PSQL on different Server
-  become: yes
-    vars:
-     db_name: employee_db
-     db_user: db_user
-     db_password: Passw0rd
-
-  tasks:
-       - name: import database and restore
-         postgresql_db:
-         name: {{ db_name }}
-         state: restore
-         target: /home/sam/PSQL.dump.tar.gz
-         delegate_to: '{{ groups.db_slaves[0] }}'
+        name: {{ db_name }}
+        state: restore
+        target: /home/sam/PSQL.dump.tar.gz
+        delegate_to: '{{ groups.db_slaves[0] }}'

@@ -8,8 +8,6 @@
      files:
         - sam_sundar_slave2_hq_conf_audit.sql.gz
         - sam_sundar_slave1_hq_conf_audit.sql.gz
-        
-
   tasks:
    - name: "delete DBs on Master"
      shell: rm -f /home/sam/DB_Backups/*

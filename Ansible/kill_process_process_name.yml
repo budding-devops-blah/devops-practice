@@ -5,9 +5,6 @@
 - name: Kill running processes
   shell: "kill {{ item }}"
   with_items: "{{ hq_running_processes.stdout_lines }}"
-  
-  
-  
-  or 
-  
-ps aux | grep hyperic | grep -v grep | awk  '{print $2}' | xargs kill -9
+#or 
+- name: Get HQ Agent running processes
+  shell: ps aux | grep hyperic | grep -v grep | awk  '{print $2}' | xargs kill -9
