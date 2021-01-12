@@ -28,6 +28,14 @@
      db_user: db_user
      
   tasks:  
+  
+      - name: Install boto3 and botocore python package for Ansible Lookup Plugin to work
+        pip:
+          name: {{ item }}
+          with_items:
+               - boto3
+               - botocore
+               
       - name: Install MySQL packages
         apt:
            name: name={{ item }} update_cache=true state=present
