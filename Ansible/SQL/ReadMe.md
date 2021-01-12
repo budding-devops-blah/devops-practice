@@ -54,42 +54,44 @@ ansible-playbook -i <inventory_file> <playbook_yaml_file> --ask-vault-pass
 ansible-playbook -i psql.txt psql_create_db.yaml --ask-vault-pass
 ```
 
-## creating MySQL Dump of "employee_db" DB. (The same steps for PSQL also)
+* PlayBook Explanation
+
+### Creating MySQL Dump of "employee_db" DB. (The same steps for PSQL also)
 
 ```yaml
 - name: create a backup
-        mysql_db:
-          name: {{ db_name }}
-          state: dump
-          target: /home/sam/mysql_dump.sql
+  mysql_db:
+    name: {{ db_name }}
+    state: dump
+    target: /home/sam/mysql_dump.sql
 ```
 
-## In below task im using sync module and delegating to Slaves to pull the backup dump.
+### In below task im using sync module and delegating to Slaves to pull the backup dump.
 
 ```yaml
 - name: copy to slaves
-        synchronize:
-           src: /home/sam/mysql_dump.sql
-           dest: /home/sam/scripts/
-           mode: pull
-        delegate_to: '{{ groups.db_slaves[0] }}'
+  synchronize:
+     src: /home/sam/mysql_dump.sql
+     dest: /home/sam/scripts/
+     mode: pull
+  delegate_to: '{{ groups.db_slaves[0] }}'
 ```
 
-## Creating SQL DB by executing below task.
+### Creating SQL DB by executing below task.
 
 ```yaml
      - name: create mysql database
-        mysql_db: 
+       mysql_db: 
             name: {{ db_name }}
             state: present
 ```
 
-## Restoring the DB Dump by delegating to Slaves
+### Restoring the DB Dump by delegating to Slaves
 ```yaml
  - name: Restore the database
-        mysql_db:
-          name: {{ db_name }}
-          state: import
-          target: /home/sam/scripts/mysql_dump.sql
-        delegate_to: '{{ groups.db_slaves[0] }}'
+   mysql_db:
+     name: {{ db_name }}
+     state: import
+     target: /home/sam/scripts/mysql_dump.sql
+   delegate_to: '{{ groups.db_slaves[0] }}'
 ```		
