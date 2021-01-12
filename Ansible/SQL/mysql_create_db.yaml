@@ -1,0 +1,65 @@
+---
+ - name: Restore MySQL on different Server
+  hosts: db_servers_master
+  become: yes
+  vars:
+     db_name: employee_db
+     db_user: db_user
+     
+  tasks:     
+      - name: create a backup
+        mysql_db:
+          name: {{ db_name }}
+          state: dump
+          target: /home/sam/mysql_dump.sql
+      
+      - name: copy to slaves
+        synchronize:
+           src: /home/sam/mysql_dump.sql
+           dest: /home/sam/scripts/
+           mode: pull
+        delegate_to: '{{ groups.db_slaves[0] }}'   
+---
+ - name: Install MySQL and restore
+  hosts: db_servers_slaves
+  become: yes
+  vars:
+     db_name: employee_db
+     db_user: db_user
+     
+  tasks:  
+  
+    
+      - name: Install MySQL packages
+        apt:
+           name: name={{ item }} update_cache=true state=present
+           with_items:
+            - mysql-community-server
+            - mysql-community-client
+            
+      - name: Start the MySQL service
+        service: 
+           name: mysql 
+           state: started
+           enabled: true
+ 
+     - name: create mysql database
+        mysql_db: 
+            name: {{ db_name }}
+            state: present
+            
+      - name: Create MySQL User with access to our DB
+        mysql_user:
+             name: {{ db_user }}
+             password: "{{ lookup('aws_secret', 'psql_db_user_password') }}"
+             priv: "{{ dbname }}.*:ALL"
+             state: present     
+             
+      - name: Restore the database
+        mysql_db:
+          name: {{ db_name }}
+          state: import
+          target: /home/sam/scripts/mysql_dump.sql
+        delegate_to: '{{ groups.db_slaves[0] }}'
+        
+        
