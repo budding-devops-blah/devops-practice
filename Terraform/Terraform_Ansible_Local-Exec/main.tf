@@ -11,7 +11,7 @@ resource "aws_instance" "ansible_inventory_test" {
   vpc_security_group_ids = ["sg-0b57f7f4160f725d7"]
   subnet_id     = "subnet-086824a143f8a1d6c"
   tags = {
-    Name = "ansible_inventory_test_1"
+    Name = "ansible_inventory_test_${count.index + 1}"
   }
 }
 
@@ -38,14 +38,19 @@ resource "null_resource" "ProvisionRemoteHostsIpToAnsibleHosts" {
     host = "${element(aws_instance.ansible_inventory_test.*.private_ip, count.index)}"
     private_key = "/home/ec2-user/sam_sundar.pem"
   }
- # provisioner "remote-exec" {
- #  inline = [
- #     "sudo yum update -y",
- #     "sudo yum install python-setuptools python-pip -y",
- #     "sudo pip install httplib2"
- #   ]
- # }
+  provisioner "remote-exec" {
+   inline = [
+      "sudo yum update -y",
+      "sudo yum install python-setuptools python-pip -y",
+    ]
+  }
   provisioner "local-exec" {
     command = "echo ${element(aws_instance.ansible_inventory_test.*.private_ip, count.index)} >> hosts"
   }
+}
+resource "null_resource" "ModifyApplyAnsiblePlayBook" {
+  provisioner "local-exec" {
+    command = "sleep 10; ansible-playbook -i /home/ec2-user/hosts Jenkins_Ansible_Play.yaml"
+  }
+  depends_on = ["null_resource.ProvisionRemoteHostsIpToAnsibleHosts"]
 }
