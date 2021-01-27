@@ -38,13 +38,12 @@ resource "null_resource" "ProvisionRemoteHostsIpToAnsibleHosts" {
     host = "${element(aws_instance.ansible_inventory_test.*.private_ip, count.index)}"
     private_key = "/home/ec2-user/sam_sundar.pem"
   }
- # provisioner "remote-exec" {
- #  inline = [
- #     "sudo yum update -y",
- #     "sudo yum install python-setuptools python-pip -y",
- #     "sudo pip install httplib2"
- #   ]
- # }
+ provisioner "remote-exec" {
+  inline = [
+     "sudo yum update -y",
+     "sudo yum install python-setuptools python-pip -y",
+   ]
+}
   provisioner "local-exec" {
     command = "echo ${element(aws_instance.ansible_inventory_test.*.private_ip, count.index)} >> hosts"
   }
