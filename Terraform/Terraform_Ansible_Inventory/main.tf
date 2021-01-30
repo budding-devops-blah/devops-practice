@@ -26,6 +26,9 @@ resource "null_resource" "ConfigureAnsibleLabelVariable" {
     command = "echo ansible_ssh_private_key_file=/home/ec2-user/sam_sundar.pem >> hosts"
   }
   provisioner "local-exec" {
+    command =  "echo ansible_ssh_extra_args='-o StrictHostKeyChecking=no' >> hosts"
+  }  
+  provisioner "local-exec" {
     command = "echo [Ansible_Hosts] >> hosts"
   }
 }

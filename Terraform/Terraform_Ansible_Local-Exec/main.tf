@@ -26,6 +26,9 @@ resource "null_resource" "ConfigureAnsibleLabelVariable" {
     command = "echo ansible_ssh_private_key_file=/home/ec2-user/sam_sundar.pem >> hosts"
   }
   provisioner "local-exec" {
+    command =  "echo ansible_ssh_extra_args='-o StrictHostKeyChecking=no' >> hosts"
+  }
+  provisioner "local-exec" {
     command = "echo [Ansible_Hosts] >> hosts"
   }
 }
@@ -36,7 +39,7 @@ resource "null_resource" "ProvisionRemoteHostsIpToAnsibleHosts" {
     type = "ssh"
     user = "ec2-user"
     host = "${element(aws_instance.ansible_inventory_test.*.private_ip, count.index)}"
-    private_key = "/home/ec2-user/sam_sundar.pem"
+    private_key = file("/home/ec2-user/sam_sundar.pem")
   }
   provisioner "remote-exec" {
    inline = [
@@ -50,7 +53,7 @@ resource "null_resource" "ProvisionRemoteHostsIpToAnsibleHosts" {
 }
 resource "null_resource" "ModifyApplyAnsiblePlayBook" {
   provisioner "local-exec" {
-    command = "sleep 10; ansible-playbook -i /home/ec2-user/hosts Jenkins_Ansible_Play.yaml"
+    command = "sleep 10; ansible-playbook -i hosts Jenkins_Ansible_Play.yaml"
   }
   depends_on = ["null_resource.ProvisionRemoteHostsIpToAnsibleHosts"]
 }
