@@ -11,16 +11,27 @@
 
       - name: Backup PostgreSQL
         postgresql_db:
-                name: {{ db_name }}
+                name: "{{ db_name }}"
                 state: dump
-                target: /home/sam/PSQL.dump.tar.gz 
-      
+                target: /tmp/PSQL_dump.sql
+        become_user: postgres
+
+      - name: "Fetch DB Files"
+        fetch:
+             src: /tmp/PSQL_dump.sql
+             dest: /home/ec2-user/
+             mode: 0777
+             flat: true
+             ignore_errors: yes
+
       - name: copy to slaves
-        synchronize:
-           src: /home/sam/PSQL.dump.tar.gz
-           dest: /home/sam/
-           mode: pull
-        delegate_to: '{{ groups.db_slaves[0] }}'         
+        copy:
+           src: /home/ec2-user/PSQL_dump.sql
+           dest: /tmp
+
+      - name: Change Perm
+        shell: chmod 777 /tmp/PSQL_dump.sql
+        delegate_to: '{{ groups.db_servers_slaves[0] }}'
 ---
 - name: Install PSQL
   hosts: db_servers_slaves
@@ -32,48 +43,68 @@
 
   tasks:
   
+      - name: Install PIP
+        yum: name=python-pip update_cache=true state=present
+
+      - name: Get Password from AWS SSM
+        shell: aws secretsmanager --region ap-south-1 get-secret-value --secret-id psql_db_user_password --query SecretString --output text | jq -r ."psql_db_user_password"
+        register: aws_ssm_psql_db_password
+        delegate_to: localhost
+
       - name: Install boto3 and botocore python package for Ansible Lookup Plugin to work
-        pip:
-          name: {{ item }}
-          with_items:
+        pip: name={{ item }}
+        with_items:
                - boto3
                - botocore
-               
+        ignore_errors: yes       
+
       - name: Install PostgreSQL
-        apt: name={{ item }} update_cache=true state=present
+        yum: name={{ item }} update_cache=true state=present
         with_items:
           - postgresql
           - postgresql-contrib
-          - libpq-dev
           - python-psycopg2
+          - postgresql-server
+          - postgresql-devel
+          - postgresql-contrib
+          - postgresql-docs
         tags: packages
-      
+
+      - name: initdb
+        shell: sudo service postgresql initdb
+        ignore_errors: yes
+        
       - name: Ensure the PostgreSQL service is running
         service: name=postgresql state=started enabled=yes
-      
+
       - name: Ensure database is created
         postgresql_db: name={{ db_name }}
                    encoding='UTF-8'
                    lc_collate='en_US.UTF-8'
                    lc_ctype='en_US.UTF-8'
                    template='template0'
-                   state=present
-      
+        become_user: postgres
+        
       - name: Ensure user has access to the database
         postgresql_user: db={{ db_name }}
                      name={{ db_user }}
-                     password: "{{ lookup('aws_secret', 'psql_db_user_password') }}"
+                     password={{ item }}
                      priv=ALL
                      state=present
-      
+        become_user: postgres
+        with_items: "{{ aws_ssm_psql_db_password.stdout_lines }}"
+
       - name: Ensure user does not have unnecessary privileges
         postgresql_user: name={{ db_user }}
                      role_attr_flags=NOSUPERUSER,NOCREATEDB
                      state=present
-                     
+        become_user: postgres
+
       - name: import database and restore
         postgresql_db:
-        name: {{ db_name }}
-        state: restore
-        target: /home/sam/PSQL.dump.tar.gz
-        delegate_to: '{{ groups.db_slaves[0] }}'
+            name: "{{ db_name }}"
+            state: restore
+            target: /tmp/PSQL_dump.sql
+        delegate_to: '{{ groups.db_servers_slaves[0] }}'
+        become: yes
+        become_user: postgres
