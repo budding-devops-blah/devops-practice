@@ -1,0 +1,35 @@
+{
+    "family": "jenkins-test",
+    "placementConstraints": [],
+    "volumes": [],
+    "requiresCompatibilities": [
+        "EC2"
+    ],
+    "containerDefinitions": [
+        {
+            "memoryReservation": 128,
+            "name": "jenkins-test",
+            "mountPoints": [],
+            "image": "DOCKER_IMAGE_NAME",
+            "essential": true,
+            "portMappings": [
+                {
+                    "protocol": "tcp",
+                    "containerPort": 8080,
+                    "hostPort": 8080
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "test",
+                    "awslogs-group": "/ecs/jenkins-test"
+                }
+            },
+            "memory": 1024,
+            "cpu": 0,
+            "volumesFrom": []
+        }
+    ]
+}
