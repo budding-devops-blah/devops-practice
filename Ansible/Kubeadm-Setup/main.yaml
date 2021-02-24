@@ -1,0 +1,11 @@
+##https://www.linuxsysadmins.com/install-kubernetes-cluster-with-ansible/
+---
+- name: Instal Pre Req on Master Slave
+  import_playbook: kube_docker.yaml
+
+- name: Master Setup
+  import_playbook: master.yaml
+
+- name: Slave setup and Join master
+  import_playbook: worker.yaml
+
