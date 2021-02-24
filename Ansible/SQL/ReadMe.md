@@ -94,4 +94,4 @@ ansible-playbook -i psql.txt psql_create_db.yaml --ask-vault-pass
      state: import
      target: /home/sam/scripts/mysql_dump.sql
    delegate_to: '{{ groups.db_slaves[0] }}'
-```		
+```	
