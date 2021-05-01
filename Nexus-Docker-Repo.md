@@ -21,7 +21,7 @@ cat /opt/sonatype-work/nexus3/admin.password
 * Click on `Create Repository` and choose `docker (hosted)` option, give a unique name for your repo and under Repository Connectors option, click on http connector and mention any port (I choose 10001 since it's a Random port which no other service runs on it.)
 > Note: The port which you choose under http connector is your Docker Repo's port and you can access it on that port only. 
 
-> Now that we have created a repo, let's see how we can tag our images and push to our Self Hosted Nexus Docker Repo.
+##### Now that we have created a repo, let's see how we can tag our images and push to our Self Hosted Nexus Docker Repo.
 
 #### Tagging Docker images 
 * First let's set our Repository config in our machine where Docker is running by entering below command. (I'm running on my local hence 127.0.0.1, please use your server's IP if you try to access from different machine).
@@ -54,27 +54,27 @@ docker pull 127.0.0.1:10001/test_hello:1.0
 ``` bash
 nexus-cli configure
 Enter Nexus Host: http://127.0.0.1:8081
-Enter Nexus Repository Name: test_apty_2
+Enter Nexus Repository Name: test_sam_2
 Enter Nexus Username: admin
 Enter Nexus Password: *******
 ```
 * Check the images in our Repo
 ```bash
 nexus-cli image ls
-nginx_apty
+nginx_sam
 Total images: 1
 ```
 * Check Image with their Tags
 ```bash
-nexus-cli image tags -name nginx_apty
+nexus-cli image tags -name nginx_sam
 1.0
 1.1
-There are 2 images for nginx_apty
+There are 2 images for nginx_sam
 ```
 
 ```bash
-nexus-cli image info -name nginx_apty -tag 1.0
-Image: nginx_apty:1.0
+nexus-cli image info -name nginx_sam -tag 1.0
+Image: nginx_sam:1.0
 Size: 7736
 Layers:
 	sha256:f7ec5a41d630a33a2d1db59b95d89d93de7ae5a619a3a8571b78457e48266eba	27139373
@@ -86,13 +86,15 @@ Layers:
  ``` 
 * Create a Lifecycle policy to delete every image and keep only last 4 versions of the image.  
 ```bash
-nexus-cli image delete -name nginx_apty -keep 4
-nginx_apty:1.0 image will be deleted ...
-nginx_apty:1.0 has been successful deleted
+nexus-cli image delete -name nginx_sam -keep 4
+nginx_sam:1.0 image will be deleted ...
+nginx_sam:1.0 has been successful deleted
 ```
 
 
 ##### Ref Links
-> https://www.blog.labouardy.com/cleanup-old-docker-images-from-nexus-repository/
-> https://blog.sonatype.com/cleanup-old-docker-images-from-nexus-repository
-> https://help.sonatype.com/repomanager2/installing-and-running/configuring-nexus-repository-manager-as-a-service
+* > https://www.blog.labouardy.com/cleanup-old-docker-images-from-nexus-repository/
+
+* > https://blog.sonatype.com/cleanup-old-docker-images-from-nexus-repository
+
+* > https://help.sonatype.com/repomanager2/installing-and-running/configuring-nexus-repository-manager-as-a-service
