@@ -51,6 +51,8 @@ services:
     privileged: true
     volumes:
       - ./config/alertmanager.yml:/alertmanager.yml
+      ###For Slack Aler Manager
+      ###- ./config/slack-alertmanager.yml:/alertmanager.yml
     command:
       - '--config.file=/alertmanager.yml'
     ports:
