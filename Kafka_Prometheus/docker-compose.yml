@@ -2,15 +2,16 @@ version: '3.1'
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper
+    container_name: zookeeper
     network_mode: host
     ports:
       - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
 
-
   kafka1:
     image: confluentinc/cp-kafka
+    container_name: kafka
     network_mode: host
     depends_on:
       - zookeeper
@@ -36,6 +37,7 @@ services:
     ports:
       - 9090:9090
     image: prom/prometheus
+    container_name: prometheus
     volumes:
        - ./config:/prometheus
        - ./data:/data  
@@ -48,11 +50,12 @@ services:
 
   alertmanager:
     image: prom/alertmanager
+    container_name: alertmanager
     privileged: true
     volumes:
-      - ./config/alertmanager.yml:/alertmanager.yml
+      ##- ./config/alertmanager.yml:/alertmanager.yml
       ###For Slack Aler Manager
-      ###- ./config/slack-alertmanager.yml:/alertmanager.yml
+      - ./config/slack-alertmanager.yml:/alertmanager.yml
     command:
       - '--config.file=/alertmanager.yml'
     ports:
@@ -61,5 +64,6 @@ services:
   grafana:
     network_mode: host
     image: grafana/grafana:latest
+    container_name: grafana
     ports:
       - 3000:3000
